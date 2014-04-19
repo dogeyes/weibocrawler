@@ -1,7 +1,5 @@
 package weibocrawler;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -9,23 +7,17 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class ResolvePage {
-	public static void main(String[] args)throws IOException {
-		File in = new File("page1.html");
-		Document doc = Jsoup.parse(in, "UTF-8", "http://weibo.cn");
-		
-		Elements weibos = doc.select("div.c[id]");
-		for(Element weibo : weibos)
-		{
-			SaveWeibo.saveWeibo(resolveWeibo(weibo));
-		}
-				
-	}
+/**
+ * 
+ * @author daixing
+ *	分析页面
+ */
+public class PageResolver {
+	
 	public static List<Weibo> resolvePage(Document doc)  //分析主用户微博页面
 	{
 		ArrayList<Weibo> weibos = new ArrayList<Weibo>();
@@ -36,7 +28,7 @@ public class ResolvePage {
 		}
 		return weibos;
 	}
-	public static Weibo resolveWeibo(Element weiboHtml) //分析主用户的首页的timeline微博
+	public static Weibo resolveWeibo(Element weiboHtml) //提取主用户首页微博
 	{
 		System.out.println("_________________________________________");
 //		System.out.println(weibo);
@@ -66,11 +58,7 @@ public class ResolvePage {
 	public static Weibo resolveUserWeibo(Element weiboHtml, String username, String screenname) //分析用户微博
 	{
 		System.out.println("_________________________________________");
-//		System.out.println(weibo);
 		String id = weiboHtml.attr("id");
-//		Element user = weiboHtml.select("a.nk").first();
-//		String userName = getNameFromUrl(user.attr("href"));
-//		String screenName = user.text();
 		String content = contentDiscardUrl(weiboHtml.select("span.ctt").first().html());
 		Element timeElement = weiboHtml.select("span.ct").first();
 		Date time = calculateTime(timeElement.html());
@@ -88,7 +76,7 @@ public class ResolvePage {
 			return matcher.group(2);
 		return null;
 	}
-	public static Date calculateTime(String timeOrigin)
+	public static Date calculateTime(String timeOrigin)	//从时间字符串分析出具体时间
 	{
 		Pattern pattern = Pattern.compile("(.*?)&nbsp;");
 		Matcher matcher = pattern.matcher(timeOrigin);
@@ -97,14 +85,14 @@ public class ResolvePage {
 		{
 			timeString = matcher.group(1);
 			System.out.println(timeString);
-			Pattern patternMin = Pattern.compile("(\\d+)分钟前");
+			Pattern patternMin = Pattern.compile("(\\d+)分钟前");	 // **分钟前的形式
 			Matcher matcherMin = patternMin.matcher(timeString);
 			if(matcherMin.find())
 			{
 				Integer minute = Integer.parseInt(matcherMin.group(1));
 				return adjustTime(new Date(), minute);
 			}
-			Pattern patternToday = Pattern.compile("今天 +(\\d+):(\\d+)");
+			Pattern patternToday = Pattern.compile("今天 +(\\d+):(\\d+)"); //今天 **:**
 			Matcher matcherToday = patternToday.matcher(timeString);
 			if(matcherToday.find())
 			{
@@ -112,7 +100,7 @@ public class ResolvePage {
 				Integer minute = Integer.parseInt(matcherToday.group(2));
 				return adjustTime(new Date(), hour, minute);
 			}
-			Pattern patternDate = Pattern.compile("(\\d+)月(\\d+)日 +(\\d+):(\\d+)");
+			Pattern patternDate = Pattern.compile("(\\d+)月(\\d+)日 +(\\d+):(\\d+)"); //**月**日 **:**
 			Matcher matcherDate = patternDate.matcher(timeString);
 			if(matcherDate.find())
 			{
@@ -152,11 +140,19 @@ public class ResolvePage {
 		return calendar.getTime();
 	}
 
-	public static String contentDiscardUrl(String content)
+	public static String contentDiscardUrl(String content)   //去除内容中@其他人的链接
 	{
 		Pattern pattern = Pattern.compile("(<a +href.*?>)|(</a>)");
 		Matcher matcher = pattern.matcher(content);
 		
 		return (matcher.replaceAll(""));
+	}
+
+	public static String nextPageUrlSuffix(Document doc)  //获得下一页地址的后缀
+	{
+		Element pageAction = doc.select("form[action] > div > a[href]").first();
+		if(!pageAction.text().equals("下页"))
+			return null;
+		return pageAction.attr("href");
 	}
 }

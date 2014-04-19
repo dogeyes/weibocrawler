@@ -3,23 +3,22 @@ package weibocrawler;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class SaveWeibo {
+import static weibocrawler.WeiboCrawlerConstant.*;
+
+public class WeiboSaver {
 	public static void saveWeibo(Weibo weibo)
 	{
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			String mysqlUrl="jdbc:mysql://127.0.0.1:3306/weibo?useUnicode=true&characterEncoding=utf8";
 	        Connection conn;
-	        conn = DriverManager.getConnection(mysqlUrl,"root","");
-	        String sql = "insert into weibo_1 values (?, ?, ?, ?, ?)";
+	        conn = DriverManager.getConnection(MYSQLURL,MYSQL_USERNAME,MYSQL_PASSWORD);
+	        String sql = "insert into " + WEIBO_TABLE + " values (?, ?, ?, ?, ?)";
 	        PreparedStatement stmt = conn.prepareStatement(sql); 
 	        stmt.setString(1, weibo.getId());
 	        stmt.setString(2, weibo.getUserName());
@@ -41,10 +40,9 @@ public class SaveWeibo {
 		Date lastestWeiboTime = weibos.get(0).getTime();
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			String mysqlUrl="jdbc:mysql://127.0.0.1:3306/weibo?useUnicode=true&characterEncoding=utf8";
 	        Connection conn;
-	        conn = DriverManager.getConnection(mysqlUrl,"root","");
-	        String sql = "insert into weibo_1 values (?, ?, ?, ?, ?)";
+	        conn = DriverManager.getConnection(MYSQLURL,MYSQL_USERNAME,MYSQL_PASSWORD);
+	        String sql = "insert into " + WEIBO_TABLE + " values (?, ?, ?, ?, ?)";
 	        PreparedStatement stmt = conn.prepareStatement(sql);
 	        for(Weibo weibo : weibos)
 	        {
