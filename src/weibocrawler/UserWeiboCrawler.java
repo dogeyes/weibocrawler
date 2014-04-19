@@ -115,7 +115,7 @@ public class UserWeiboCrawler implements Runnable {
 				if(urlsuffix == null)   //没有下一页
 					break;
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(WAIT_TIME);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

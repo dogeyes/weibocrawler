@@ -8,5 +8,6 @@ public class WeiboCrawlerConstant {
 	public static final String MYSQLURL="jdbc:mysql://127.0.0.1:3306/weibo?useUnicode=true&characterEncoding=utf8";
 	public static final String MYSQL_USERNAME ="root";
 	public static final String MYSQL_PASSWORD = "";
+	public static final Integer WAIT_TIME = 1000; //ms
 
 }
