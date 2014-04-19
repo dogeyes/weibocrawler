@@ -134,7 +134,7 @@ public class PageResolver {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.set(Calendar.MONTH, month - 1); //貌似一月是0
-		calendar.set(Calendar.DAY_OF_MONTH, day);
+		calendar.set(Calendar.DAY_OF_MONTH, day - 1); //1号是0
 		calendar.set(Calendar.HOUR, hour);
 		calendar.set(Calendar.MINUTE, minute);
 		return calendar.getTime();
