@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="weibocrawler.WeiboMapper">
+    <resultMap type="weibocrawler.Weibo" id="weibomap">
+        <result column="userName" property="userName"/>
+        <result column="name" property="name"/>
+        <result column="screenName" property="screenName"/>
+        <result column="content" property="content"/>
+        <result column="time" property="time"/>
+    </resultMap>
+    <insert id="addWeibo" parameterType="Weibo" > 
+        insert into weibo_1(id,userName,screenName,content,time)  
+             values(#{id},#{userName},#{screenName},#{content},#{time})  
+    </insert>
+    
+    <select id="selectByID" parameterType="String" resultMap="weibomap">
+            select * from weibo_1
+    </select>
+   
+</mapper>
