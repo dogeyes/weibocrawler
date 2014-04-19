@@ -26,7 +26,7 @@ public class ResolvePage {
 		}
 				
 	}
-	public static List<Weibo> resolvePage(Document doc)
+	public static List<Weibo> resolvePage(Document doc)  //分析主用户微博页面
 	{
 		ArrayList<Weibo> weibos = new ArrayList<Weibo>();
 		Elements weiboElements = doc.select("div.c[id]");
@@ -36,7 +36,7 @@ public class ResolvePage {
 		}
 		return weibos;
 	}
-	public static Weibo resolveWeibo(Element weiboHtml)
+	public static Weibo resolveWeibo(Element weiboHtml) //分析主用户的首页的timeline微博
 	{
 		System.out.println("_________________________________________");
 //		System.out.println(weibo);
@@ -51,6 +51,43 @@ public class ResolvePage {
 				+"screenName: " + screenName + "\n content: " + content + "\n time: " + time);
 		return new Weibo(id, userName, screenName, content, time);
 	}
+	
+	public static List<Weibo> resolveUserPage(Document doc, String username)  //分析用户微博页面
+	{
+		
+		String screenname;
+		Element userElement = doc.select("span.ctt").first();
+		screenname = userElement.text();
+		Integer index = screenname.indexOf('[');
+		if(index >= 0)
+			screenname = screenname.substring(0, index);
+		
+		ArrayList<Weibo> weibos = new ArrayList<Weibo>();
+		Elements weiboElements = doc.select("div.c[id]");
+		for(Element weiboElement : weiboElements)
+		{
+			weibos.add(resolveUserWeibo(weiboElement, username, screenname));
+		}
+		return weibos;
+	}
+	
+	public static Weibo resolveUserWeibo(Element weiboHtml, String username, String screenname) //分析用户微博
+	{
+		System.out.println("_________________________________________");
+//		System.out.println(weibo);
+		String id = weiboHtml.attr("id");
+//		Element user = weiboHtml.select("a.nk").first();
+//		String userName = getNameFromUrl(user.attr("href"));
+//		String screenName = user.text();
+		String content = contentDiscardUrl(weiboHtml.select("span.ctt").first().html());
+		Element timeElement = weiboHtml.select("span.ct").first();
+		Date time = calculateTime(timeElement.html());
+		System.out.println("id: " + id + "\n username: " + username + "\n "
+				+"screenName: " + screenname + "\n content: " + content + "\n time: " + time);
+		return new Weibo(id, username, screenname, content, time);
+	}
+	
+
 	public static String getNameFromUrl(String url)
 	{
 		Pattern pattern = Pattern.compile("http://weibo.cn/(u/)?(\\w*)");

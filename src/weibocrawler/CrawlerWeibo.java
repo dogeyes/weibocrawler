@@ -18,7 +18,7 @@ public class CrawlerWeibo {
 	private static String datefileString = "src/lastWeiboTime.dat"; //存储上一次爬到得微博的最晚时间
 	private static DateFormat dateFormat;
 	
-	public static void crawlerWeibo() throws IOException
+	public static void crawlerOwnerWeibo() throws IOException
 	{
 		Scanner in = new Scanner(new File(datefileString));
 		String timeString = in.nextLine();
@@ -42,7 +42,7 @@ public class CrawlerWeibo {
 			
 			
 			String index_url = "http://weibo.cn";  //这里爬取的微博的主页，也就是用户关注的人的微博
-			String urlsuffix = "?since_id=B0jSoyk3U&max_id=B0jIzfeUz&prev_page=50&page=49&st=d066";
+			String urlsuffix = "";
 			lastestDate = lastWeiboTime;
 			for(;;)
 			{
@@ -75,7 +75,7 @@ public class CrawlerWeibo {
  	}
 	public static void main(String[] args) {
 		try {
-			crawlerWeibo();
+			crawlerOwnerWeibo();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

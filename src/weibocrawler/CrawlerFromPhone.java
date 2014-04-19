@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 
+
 import org.apache.http.Consts;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -29,13 +30,17 @@ import Log.HtmlFileLog;
 public class CrawlerFromPhone { //从手机网页上爬数据
 	private String username; //用户名
 	private String password; //密码
-	private final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36";
-	private final String INDEX_PAGE ="http://weibo.cn";  //手机微博首页
-	
+	private static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36";
+	private static final String INDEX_PAGE ="http://weibo.cn";  //手机微博首页
+	private Map<String, String> cookies;
 	public CrawlerFromPhone(String username, String password)
 	{
 		this.username = username;
 		this.password = password;
+	}
+	public CrawlerFromPhone(Map<String, String> cookies)
+	{
+		this.cookies = cookies;
 	}
 	//取得登陆的认证cookie，后续请求加入该cookie无需登陆
 	public Map<String, String> getCookies() throws IOException
@@ -103,7 +108,7 @@ public class CrawlerFromPhone { //从手机网页上爬数据
     	return cookies;
 	}
 	
-	public void getPages(Map<String, String> cookies) throws IOException 
+	public static void getPages(Map<String, String> cookies) throws IOException 
 	{
     	Document docPage = getPage(cookies, INDEX_PAGE);
     	
@@ -119,7 +124,7 @@ public class CrawlerFromPhone { //从手机网页上爬数据
         	}
     	}
 	}
-	public Document getPage(Map<String, String> cookies, String url) throws IOException //获得给定url的页面
+	public static Document getPage(Map<String, String> cookies, String url) throws IOException //获得给定url的页面
 	{
 		System.out.println("fetching ---- " + url);
 		Random random = new Random();
@@ -127,10 +132,10 @@ public class CrawlerFromPhone { //从手机网页上爬数据
     	HtmlFileLog.htmlFileLog(docPage.html(), "page"+random.nextLong()+".html");  //得到页面
     	return docPage;
 	}
-	public String nextPageUrlSuffix(Document doc)  //获得下一页地址的后缀
+	public static String nextPageUrlSuffix(Document doc)  //获得下一页地址的后缀
 	{
 		Element pageAction = doc.select("form[action] > div > a[href]").first();
-		if(pageAction.text() != "下一页")
+		if(!pageAction.text().equals("下页"))
 			return null;
 		return pageAction.attr("href");
 	}
