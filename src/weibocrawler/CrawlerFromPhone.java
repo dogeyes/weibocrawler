@@ -130,6 +130,8 @@ public class CrawlerFromPhone { //从手机网页上爬数据
 	public String nextPageUrlSuffix(Document doc)  //获得下一页地址的后缀
 	{
 		Element pageAction = doc.select("form[action] > div > a[href]").first();
+		if(pageAction.text() != "下一页")
+			return null;
 		return pageAction.attr("href");
 	}
 	public static void main(String[] args) throws IOException {
