@@ -13,26 +13,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.apache.ibatis.annotations.Update;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 public class CrawlerUserWeibo implements Runnable {
 	
 	private String userName;
+	private String screenName;
 	private String baseUrl = "http://weibo.cn";
 	private Map<String, String> cookies;
 	private Date userTime;
 	
-	public CrawlerUserWeibo(String url, String username, Map<String, String> cookies)
+	public CrawlerUserWeibo(String url, String username, String screenName, Map<String, String> cookies)
 	{
 		this.baseUrl = url;
 		this.userName = username;
 		this.cookies = cookies;
+		this.screenName = screenName;
 		init();
 	}
-	public CrawlerUserWeibo(String username, Map<String, String> cookies)
+	public CrawlerUserWeibo(String username,String screenName, Map<String, String> cookies)
 	{
 		this.userName = username;
 		this.cookies = cookies;
+		this.screenName = screenName;
 		init();
 	}
 	
@@ -74,8 +79,16 @@ public class CrawlerUserWeibo implements Runnable {
 		CrawlerFromPhone crawler = new CrawlerFromPhone("dexctor@gmail.com", "dogeyes007");
 		try {
 			Map<String, String> cookies = crawler.getCookies();
-			CrawlerUserWeibo crawlerUserWeibo = new CrawlerUserWeibo("http://weibo.cn", "vczh", cookies);
-			crawlerUserWeibo.crawler();
+			CrawlerUserWeibo crawlerUserWeibo1 = new CrawlerUserWeibo("http://weibo.cn", "1597889497", "璇_二月", cookies);
+			CrawlerUserWeibo crawlerUserWeibo2 = new CrawlerUserWeibo("http://weibo.cn", "tianchunbinghe", "田春冰河", cookies);
+			CrawlerUserWeibo crawlerUserWeibo3 = new CrawlerUserWeibo("http://weibo.cn", "jeffz", "老赵", cookies);
+			Thread thread1 = new Thread(crawlerUserWeibo1);
+			Thread thread2 = new Thread(crawlerUserWeibo2);
+			Thread thread3 = new Thread(crawlerUserWeibo3);
+			
+			thread1.start();
+			thread2.start();
+			thread3.start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -84,18 +97,18 @@ public class CrawlerUserWeibo implements Runnable {
 	
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		
+		crawler();		
 	}
 	public void crawler()
 	{
 		Date lastestDate = userTime;
 		String urlsuffix = '/' + userName;
+				
 		for(;;)
 		{
 			try {
 				Document page = CrawlerFromPhone.getPage(cookies, baseUrl + urlsuffix);
-				List<Weibo> weibos = ResolvePage.resolveUserPage(page, userName);
+				List<Weibo> weibos = ResolvePage.resolveUserPage(page, userName, screenName);
 				Date currentPageTime = SaveWeibo.saveWeibos(weibos, userTime);
 				if(currentPageTime.after(lastestDate))
 					lastestDate = currentPageTime;
@@ -114,6 +127,31 @@ public class CrawlerUserWeibo implements Runnable {
 			}
 			
 		}
+		close(userName, lastestDate);
 	}
 	
+	public static void close(String userName, Date lastestDate)
+	{
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			String mysqlUrl="jdbc:mysql://127.0.0.1:3306/weibo?useUnicode=true&characterEncoding=utf8";
+	        Connection conn;
+	        conn = DriverManager.getConnection(mysqlUrl,"root","");
+	        String sql = "update user set usertime=? where username=?";
+	        
+	        PreparedStatement stmt = conn.prepareStatement(sql);
+	        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	        stmt.setTimestamp(1, Timestamp.valueOf(dateFormat.format(lastestDate)));
+	        stmt.setString(2, userName);
+	        
+	        System.out.println(stmt);
+	        if(stmt.executeUpdate() <= 0)
+	        	throw new Exception();
+	        stmt.close();
+	        conn.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 }

@@ -52,16 +52,8 @@ public class ResolvePage {
 		return new Weibo(id, userName, screenName, content, time);
 	}
 	
-	public static List<Weibo> resolveUserPage(Document doc, String username)  //分析用户微博页面
+	public static List<Weibo> resolveUserPage(Document doc, String username, String screenname)  //分析用户微博页面
 	{
-		
-		String screenname;
-		Element userElement = doc.select("span.ctt").first();
-		screenname = userElement.text();
-		Integer index = screenname.indexOf('[');
-		if(index >= 0)
-			screenname = screenname.substring(0, index);
-		
 		ArrayList<Weibo> weibos = new ArrayList<Weibo>();
 		Elements weiboElements = doc.select("div.c[id]");
 		for(Element weiboElement : weiboElements)
