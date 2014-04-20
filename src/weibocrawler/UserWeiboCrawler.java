@@ -53,7 +53,8 @@ public class UserWeiboCrawler implements Runnable {
 	        ResultSet rs = stmt.executeQuery();
 	        if(rs != null && rs.next()) //获取上次抓取的时间
 	        	this.lastTime = rs.getTimestamp(1);
-	        else {   	//数据库中没有用户的时间，时间设置位7天以前
+	        if(this.lastTime == null)  	//数据库中没有用户的时间，时间设置位7天以前
+	        {
 	        	Calendar calendar = Calendar.getInstance();
 	        	calendar.setTime(new Date());
 	        	calendar.add(Calendar.DAY_OF_YEAR, -7);
@@ -106,6 +107,8 @@ public class UserWeiboCrawler implements Runnable {
 			try {
 				Document page = PageFetcher.getPage(cookies, baseUrl + urlsuffix);   //获取页面
 				List<Weibo> weibos = PageResolver.resolveUserPage(page, uid, screenName); //分析页面，得到微博
+				if(weibos.isEmpty())
+					break;
 				Date currentPageTime = WeiboSaver.saveWeibos(weibos, lastTime);  //存储微博
 				if(currentPageTime.after(lastestDate))
 					lastestDate = currentPageTime;
@@ -124,7 +127,7 @@ public class UserWeiboCrawler implements Runnable {
 			}
 			
 		}
-		close(uid, lastestDate);
+		close(uid, new Date());
 	}
 	
 	public static void close(String uid, Date lastestDate)
@@ -136,7 +139,7 @@ public class UserWeiboCrawler implements Runnable {
 	        String sql = "update " + USER_TABLE + " set lastTime=? where uid=?";
 	        
 	        PreparedStatement stmt = conn.prepareStatement(sql);
-	        stmt.setTimestamp(1, new Timestamp((new Date()).getTime())); 
+	        stmt.setTimestamp(1, new Timestamp(lastestDate.getTime())); 
 	        
 	        stmt.setString(2, uid);
 	        

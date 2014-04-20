@@ -25,7 +25,11 @@ public class PageResolver {
 		Elements userElements = doc.select("table tbody");
 		for (Element userElement: userElements) 
 		{
-			users.add(resolverUser(userElement));
+			try {
+				users.add(resolverUser(userElement));
+			} catch (NullPointerException e) {
+				e.printStackTrace();
+			}
 		}
 		return users;
 	}
@@ -139,6 +143,19 @@ public class PageResolver {
 				Integer minute = Integer.parseInt(matcherDate.group(4));
 				return adjustTime(new Date(),month, day, hour, minute);
 			}
+			Pattern patternFull = Pattern.compile("(\\d+)-(\\d+)-(\\d+) (\\d+):(\\d+):(\\d+)"); //**-**-** **:**:**
+			Matcher matcherFull = patternFull.matcher(timeString);
+			if(matcherFull.find())
+			{
+				Integer year = Integer.parseInt(matcherFull.group(1));
+				Integer month = Integer.parseInt(matcherFull.group(2));
+				Integer day = Integer.parseInt(matcherFull.group(3));
+				Integer hour = Integer.parseInt(matcherFull.group(4));
+				Integer minute = Integer.parseInt(matcherFull.group(5));
+				Integer second = Integer.parseInt(matcherFull.group(6));
+				return adjustTime(new Date(),year, month, day, hour, minute, second);
+			}
+
 				
 		}
 		
@@ -154,7 +171,7 @@ public class PageResolver {
 	public static Date adjustTime(Date date, Integer hour, Integer minute) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		calendar.set(Calendar.HOUR, hour);
+		calendar.set(Calendar.HOUR_OF_DAY, hour);
 		calendar.set(Calendar.MINUTE, minute);
 		calendar.set(Calendar.SECOND, 0);
 		return calendar.getTime();
@@ -168,6 +185,19 @@ public class PageResolver {
 		calendar.set(Calendar.HOUR_OF_DAY, hour);
 		calendar.set(Calendar.MINUTE, minute);
 		calendar.set(Calendar.SECOND, 0);
+		return calendar.getTime();
+	}
+
+	public static Date adjustTime(Date date,Integer year, Integer month, Integer day, Integer hour, Integer minute, Integer second)
+	{
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.set(Calendar.YEAR, year);
+		calendar.set(Calendar.MONTH, month - 1);   //貌似第一个月是0
+		calendar.set(Calendar.DAY_OF_MONTH, day);
+		calendar.set(Calendar.HOUR_OF_DAY, hour);
+		calendar.set(Calendar.MINUTE, minute);
+		calendar.set(Calendar.SECOND, second);
 		return calendar.getTime();
 	}
 

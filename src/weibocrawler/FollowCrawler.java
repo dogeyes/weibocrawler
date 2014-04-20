@@ -72,13 +72,11 @@ public class FollowCrawler implements Runnable {
 				System.out.println(urlsuffix);
 				if (urlsuffix == null) {// 没有下一页
 					//批量插入处理
-					Schedule.myLock.lock();
-					batchFindUsers(NEWUSER_TABLE, waitForProcess_list);
-					batchFindUsers(OLDUSER_TABLE, waitForProcess_list);
-					batchInsertNewUserTable(waitForProcess_list);
-					batchInsertUserTable(waitForProcess_list);
-					batchInsertUserRelationTable(id, waitForProcess_list);
-					Schedule.myLock.unlock();
+					batchFindUsers(USER_TABLE, waitForProcess_list);   //去除已经在数据库里的用户
+//					batchFindUsers(OLDUSER_TABLE, waitForProcess_list);
+//					batchInsertNewUserTable(waitForProcess_list);      
+					batchInsertUserTable(waitForProcess_list);			//将新用户加入到数据库中
+					batchInsertUserRelationTable(id, waitForProcess_list);  //将新的用户关系插入到数据库中
 					break;
 				}
 				try {
@@ -191,8 +189,8 @@ public class FollowCrawler implements Runnable {
 	public static void main(String[] args) throws Exception {
 		
 		String id = "3202926715";
-		String username = "yyb1989249@sohu.com";
-		String password = "5234415";
+		String username = "liangchen1988915@gmail.com";
+		String password = "12345678";
 		Map<String, String> cookies = Loginer.getCookies(username, password);
 		FollowCrawler crawlerFollow = new FollowCrawler(id, cookies);
 		// 启动线程

@@ -12,6 +12,9 @@ public class WeiboCrawlerConstant {
 	public static final String MYSQLURL = "jdbc:mysql://127.0.0.1:3306/weibo?useUnicode=true&characterEncoding=utf8";
 	public static final String MYSQL_USERNAME = "root";
 	public static final String MYSQL_PASSWORD = "";
-	public static final Integer WAIT_TIME = 5000; // ms
+	public static final Integer WEIBO_THREAD_INTEGER = 4;
+	public static final Integer WAIT_TIME = 3000 * WEIBO_THREAD_INTEGER; // ms
+	public static final Integer CRAWLER_PEROID = 10 * 60 * 1000; //ms
+	public static final Integer FOLLOW_THREAD = 1;
 
 }

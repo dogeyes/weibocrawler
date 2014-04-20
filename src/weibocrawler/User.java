@@ -19,7 +19,7 @@ public class User {
 		{
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(new Date());
-			calendar.add(Calendar.DAY_OF_YEAR, -10);
+			calendar.add(Calendar.DAY_OF_YEAR, -8);
 			this.lastTime = calendar.getTime();
 		}
 	}
