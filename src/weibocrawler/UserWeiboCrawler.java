@@ -18,23 +18,23 @@ import org.jsoup.nodes.Document;
 import static weibocrawler.WeiboCrawlerConstant.*;
 public class UserWeiboCrawler implements Runnable {
 	
-	private String userName;
+	private String uid;
 	private String screenName;
 	private String baseUrl = INDEX_PAGE;
 	private Map<String, String> cookies;
-	private Date userTime;
+	private Date lastTime;
 	
-	public UserWeiboCrawler(String url, String username, String screenName, Map<String, String> cookies)
+	public UserWeiboCrawler(String url, String uid, String screenName, Map<String, String> cookies)
 	{
 		this.baseUrl = url;
-		this.userName = username;
+		this.uid = uid;
 		this.cookies = cookies;
 		this.screenName = screenName;
 		init();
 	}
-	public UserWeiboCrawler(String username,String screenName, Map<String, String> cookies)
+	public UserWeiboCrawler(String uid,String screenName, Map<String, String> cookies)
 	{
-		this.userName = username;
+		this.uid = uid;
 		this.cookies = cookies;
 		this.screenName = screenName;
 		init();
@@ -46,18 +46,18 @@ public class UserWeiboCrawler implements Runnable {
 			Class.forName("com.mysql.jdbc.Driver");
 	        Connection conn;
 	        conn = DriverManager.getConnection(MYSQLURL,MYSQL_USERNAME, MYSQL_PASSWORD);
-	        String sql = "select usertime from " + USER_TABLE + " where username=?";
+	        String sql = "select lastTime from " + USER_TABLE + " where uid=?";
 	        PreparedStatement stmt = conn.prepareStatement(sql);
-	        stmt.setString(1, userName);
+	        stmt.setString(1, uid);
 	        System.out.println(stmt);
 	        ResultSet rs = stmt.executeQuery();
 	        if(rs != null && rs.next()) //获取上次抓取的时间
-	        	this.userTime = rs.getTimestamp(1);
+	        	this.lastTime = rs.getTimestamp(1);
 	        else {   	//数据库中没有用户的时间，时间设置位7天以前
 	        	Calendar calendar = Calendar.getInstance();
 	        	calendar.setTime(new Date());
 	        	calendar.add(Calendar.DAY_OF_YEAR, -7);
-				this.userTime = calendar.getTime();
+				this.lastTime = calendar.getTime();
 			}
 	        rs.close();
 	        stmt.close();
@@ -76,9 +76,9 @@ public class UserWeiboCrawler implements Runnable {
 	
 		try {
 			Map<String, String> cookies = Loginer.getCookies("dexctor@gmail.com", "dogeyes007");
-			UserWeiboCrawler crawlerUserWeibo1 = new UserWeiboCrawler("http://weibo.cn", "1597889497", "璇_二月", cookies);
-			UserWeiboCrawler crawlerUserWeibo2 = new UserWeiboCrawler("http://weibo.cn", "tianchunbinghe", "田春冰河", cookies);
-			UserWeiboCrawler crawlerUserWeibo3 = new UserWeiboCrawler("http://weibo.cn", "jeffz", "老赵", cookies);
+			UserWeiboCrawler crawlerUserWeibo1 = new UserWeiboCrawler("http://weibo.cn", "1969890953", "网易另一面", cookies);
+			UserWeiboCrawler crawlerUserWeibo2 = new UserWeiboCrawler("http://weibo.cn", "3256651197", "搜狐", cookies);
+			UserWeiboCrawler crawlerUserWeibo3 = new UserWeiboCrawler("http://weibo.cn", "2039246561", "马航事件中国政府工作组", cookies);
 			Thread thread1 = new Thread(crawlerUserWeibo1);
 			Thread thread2 = new Thread(crawlerUserWeibo2);
 			Thread thread3 = new Thread(crawlerUserWeibo3);
@@ -98,18 +98,18 @@ public class UserWeiboCrawler implements Runnable {
 	}
 	public void crawler()
 	{
-		Date lastestDate = userTime;
-		String urlsuffix = '/' + userName;
+		Date lastestDate = lastTime;
+		String urlsuffix = '/' + uid;
 				
 		for(;;)
 		{
 			try {
 				Document page = PageFetcher.getPage(cookies, baseUrl + urlsuffix);   //获取页面
-				List<Weibo> weibos = PageResolver.resolveUserPage(page, userName, screenName); //分析页面，得到微博
-				Date currentPageTime = WeiboSaver.saveWeibos(weibos, userTime);  //存储微博
+				List<Weibo> weibos = PageResolver.resolveUserPage(page, uid, screenName); //分析页面，得到微博
+				Date currentPageTime = WeiboSaver.saveWeibos(weibos, lastTime);  //存储微博
 				if(currentPageTime.after(lastestDate))
 					lastestDate = currentPageTime;
-				if(currentPageTime.before(userTime))  //当前爬到的微博已经比上一次的要晚，退出
+				if(currentPageTime.before(lastTime))  //当前爬到的微博已经比上一次的要晚，退出
 					break;
 				urlsuffix = PageResolver.nextPageUrlSuffix(page); //下一页地址的后半部分
 				if(urlsuffix == null)   //没有下一页
@@ -124,21 +124,21 @@ public class UserWeiboCrawler implements Runnable {
 			}
 			
 		}
-		close(userName, lastestDate);
+		close(uid, lastestDate);
 	}
 	
-	public static void close(String userName, Date lastestDate)
+	public static void close(String uid, Date lastestDate)
 	{
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 	        Connection conn;
 	        conn = DriverManager.getConnection(MYSQLURL,MYSQL_USERNAME, MYSQL_PASSWORD);
-	        String sql = "update " + USER_TABLE + " set usertime=? where username=?";
+	        String sql = "update " + USER_TABLE + " set lastTime=? where uid=?";
 	        
 	        PreparedStatement stmt = conn.prepareStatement(sql);
-	        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	        stmt.setTimestamp(1, Timestamp.valueOf(dateFormat.format(lastestDate)));
-	        stmt.setString(2, userName);
+	        stmt.setTimestamp(1, new Timestamp((new Date()).getTime())); 
+	        
+	        stmt.setString(2, uid);
 	        
 	        System.out.println(stmt);
 	        if(stmt.executeUpdate() <= 0)

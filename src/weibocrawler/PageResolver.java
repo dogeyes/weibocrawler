@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.ibatis.scripting.xmltags.IfSqlNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -18,6 +19,34 @@ import org.jsoup.select.Elements;
  */
 public class PageResolver {
 	
+	public static List<User> resolverUserPage(Document doc)
+	{
+		ArrayList<User> users = new ArrayList<User>();
+		Elements userElements = doc.select("table tbody");
+		for (Element userElement: userElements) 
+		{
+			users.add(resolverUser(userElement));
+		}
+		return users;
+	}
+	public static User resolverUser(Element userHtml)
+	{
+		System.out.println("--------------------------");
+		String uid = null;
+		String screenname = null;
+		Elements tests =  userHtml.select("a[href*=http://weibo.cn/attention]");
+		String uidHref = tests.first().attr("href");
+		Pattern pattern = Pattern.compile("http://weibo.cn/attention/.*uid=(\\d+)");
+		Matcher matcher = pattern.matcher(uidHref);
+		if(matcher.find())
+			uid = matcher.group(1);
+		
+		screenname = userHtml.select("td[valign]").get(1).select("a[href]").first().text();
+		
+		System.out.println("uid: " + uid + "\n screenname " + screenname);
+		return new User(null, uid, screenname, null);
+		
+	}
 	public static List<Weibo> resolvePage(Document doc)  //分析主用户微博页面
 	{
 		ArrayList<Weibo> weibos = new ArrayList<Weibo>();
@@ -127,16 +156,18 @@ public class PageResolver {
 		calendar.setTime(date);
 		calendar.set(Calendar.HOUR, hour);
 		calendar.set(Calendar.MINUTE, minute);
+		calendar.set(Calendar.SECOND, 0);
 		return calendar.getTime();
 	}
 	public static Date adjustTime(Date date, Integer month, Integer day, Integer hour, Integer minute)
 	{
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		calendar.set(Calendar.MONTH, month - 1); //貌似一月是0
-		calendar.set(Calendar.DAY_OF_MONTH, day - 1); //1号是0
-		calendar.set(Calendar.HOUR, hour);
+		calendar.set(Calendar.MONTH, month - 1);   //貌似第一个月是0
+		calendar.set(Calendar.DAY_OF_MONTH, day);
+		calendar.set(Calendar.HOUR_OF_DAY, hour);
 		calendar.set(Calendar.MINUTE, minute);
+		calendar.set(Calendar.SECOND, 0);
 		return calendar.getTime();
 	}
 
@@ -151,7 +182,7 @@ public class PageResolver {
 	public static String nextPageUrlSuffix(Document doc)  //获得下一页地址的后缀
 	{
 		Element pageAction = doc.select("form[action] > div > a[href]").first();
-		if(!pageAction.text().equals("下页"))
+		if(pageAction == null || !pageAction.text().equals("下页"))
 			return null;
 		return pageAction.attr("href");
 	}
