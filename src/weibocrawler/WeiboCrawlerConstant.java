@@ -14,7 +14,7 @@ public class WeiboCrawlerConstant {
 	public static final String MYSQL_PASSWORD = "";
 	public static final Integer WEIBO_THREAD_INTEGER = 4;
 	public static final Integer WAIT_TIME = 3000 * WEIBO_THREAD_INTEGER; // ms
-	public static final Integer CRAWLER_PEROID = 10 * 60 * 1000; //ms
+	public static final Long CRAWLER_PEROID = 10l * 60l * 1000l; //ms
 	public static final Integer FOLLOW_THREAD = 1;
 
 }
