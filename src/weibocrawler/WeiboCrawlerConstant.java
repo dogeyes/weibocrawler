@@ -15,6 +15,10 @@ public class WeiboCrawlerConstant {
 	public static final Integer WEIBO_THREAD_INTEGER = 4;
 	public static final Integer WAIT_TIME = 3000 * WEIBO_THREAD_INTEGER; // ms
 	public static final Long CRAWLER_PEROID = 10l * 60l * 1000l; //ms
-	public static final Integer FOLLOW_THREAD = 1;
+	public static final Integer FOLLOW_THREAD = 0;
+	public static final Integer THREAD_NUM = WEIBO_THREAD_INTEGER + FOLLOW_THREAD;
+	
+	public static final Long CRAWLER_WEIBO_PEROID = 10l * 60l*1000; //爬取微博的周期
+	public static final Integer CRAWLER_USER_PEROID = 10;// 爬取用户的周期,小时
 
 }

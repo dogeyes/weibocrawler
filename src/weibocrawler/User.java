@@ -8,6 +8,7 @@ public class User {
 	private Integer id;
 	private String screenname;
 	private Date lastTime;
+	private Date lastUserTime;
 	
 	public User(Integer id, String uid, String screenname, Date lastTime)
 	{
@@ -15,13 +16,32 @@ public class User {
 		this.uid = uid;
 		this.screenname = screenname;
 		this.lastTime = lastTime;
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.add(Calendar.DAY_OF_YEAR, -8);
 		if(this.lastTime == null)
 		{
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(new Date());
-			calendar.add(Calendar.DAY_OF_YEAR, -8);
 			this.lastTime = calendar.getTime();
 		}
+		if(this.lastUserTime == null)
+			this.lastUserTime = calendar.getTime();
+	}
+	public User(Integer id, String uid, String screenname, Date lastTime, Date lastUserTime)
+	{
+		this.id = id;
+		this.uid = uid;
+		this.screenname = screenname;
+		this.lastTime = lastTime;
+		this.lastUserTime = lastUserTime;
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.add(Calendar.DAY_OF_YEAR, -8);
+		if(this.lastTime == null)
+		{
+			this.lastTime = calendar.getTime();
+		}
+		if(this.lastUserTime == null)
+			this.lastUserTime = calendar.getTime();
 	}
 	public String getUid() {
 		return uid;
@@ -56,5 +76,11 @@ public class User {
 			return uid.equals(user.getUid());
 		}
 		return false;
+	}
+	public Date getLastUserTime() {
+		return lastUserTime;
+	}
+	public void setLastUserTime(Date lastUserTime) {
+		this.lastUserTime = lastUserTime;
 	}
 }

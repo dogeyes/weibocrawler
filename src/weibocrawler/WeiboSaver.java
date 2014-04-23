@@ -51,8 +51,14 @@ public class WeiboSaver {
 		        stmt.setString(4, weibo.getContent());
 		        stmt.setTimestamp(5, new Timestamp(weibo.getTime().getTime()));
 		        System.out.println(stmt);
-		        if(stmt.executeUpdate() > 0 && weibo.getTime().after(lastestWeiboTime))
-	        		lastestWeiboTime = weibo.getTime();
+		        if(stmt.executeUpdate() > 0)
+		        {
+		        	
+		        	if(weibo.getTime().after(lastestWeiboTime))
+		        	{
+		        		lastestWeiboTime = weibo.getTime();
+		        	}
+		        }
 	        }
 	        stmt.close();
 	        conn.close();

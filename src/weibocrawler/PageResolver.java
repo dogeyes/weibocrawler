@@ -38,7 +38,7 @@ public class PageResolver {
 		System.out.println("--------------------------");
 		String uid = null;
 		String screenname = null;
-		Elements tests =  userHtml.select("a[href*=http://weibo.cn/attention]");
+		Elements tests =  userHtml.select("a[href*=http://weibo.cn/attention]");  //有些页面的特性不是这样的
 		String uidHref = tests.first().attr("href");
 		Pattern pattern = Pattern.compile("http://weibo.cn/attention/.*uid=(\\d+)");
 		Matcher matcher = pattern.matcher(uidHref);

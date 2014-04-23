@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +24,11 @@ import static weibocrawler.WeiboCrawlerConstant.*;
 //调度线程
 public class Schedule extends TimerTask implements Runnable{
 
+	private static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(THREAD_NUM);;
 	public static Queue<User> users;
 	public static ReentrantLock myLock = new ReentrantLock();
 	private Map<String, String> cookies;
 	private String uid;
-	private ExecutorService fixedThreadPool;
 	// 取得newuser表的第一条记录
 	public Schedule(String uid, Map<String, String> cookies, ExecutorService fixedThreadPool)
 	{
@@ -66,30 +67,65 @@ public class Schedule extends TimerTask implements Runnable{
 
 	@Override
 	public void run()  {
-		FollowCrawler crawlerFollow = new FollowCrawler(uid, cookies);
+		FollowCrawler crawlerFollow = new FollowCrawler(uid, cookies, fixedThreadPool);
 		fixedThreadPool.execute(crawlerFollow);
-		users = UserFetcher.getUsers();
-		while(!users.isEmpty())
-		{
-			User user = users.poll();
-			fixedThreadPool.execute(new UserWeiboCrawler(user.getUid(), user.getScreenname(), cookies));
-		}
 	}
 
-	public static void main(String[] args) {
-		
+	public static void test(String uid , Map<String, String> cookies ) //测试函数
+	{
+		ExecutorService fixedThreadPool = Executors.newFixedThreadPool(4); 
+		Timer timer = new Timer();
+		timer.schedule(new UserWeiboCrawlerSchedule(uid,cookies, fixedThreadPool), new Date(), CRAWLER_WEIBO_PEROID);
+		timer.schedule(new Schedule(uid, cookies, fixedThreadPool), new Date(), CRAWLER_WEIBO_PEROID);
+	}
+	public static void schedule(String uid)
+	{
 		String username = "liangchen1988915@gmail.com";
 		String password = "12345678";
-		String id = "3202926715";
 		Map<String, String> cookies = null;
 		try {
 			cookies = Loginer.getCookies(username, password);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		ExecutorService fixedThreadPool = Executors.newFixedThreadPool(4); 
 		
-		Timer timer = new Timer();
-		timer.schedule(new Schedule(id, cookies, fixedThreadPool), new Date(), CRAWLER_PEROID);
+		Timer timer1 = new Timer();
+		Date current = new Date();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(current);
+		calendar.add(Calendar.HOUR_OF_DAY, CRAWLER_USER_PEROID);
+		timer1.schedule(new UserCrawlerSchedule(uid, cookies, fixedThreadPool), new Date(), CRAWLER_USER_PEROID*60l*60l*1000l);
+
+		calendar.setTime(current);
+		calendar.add(Calendar.MINUTE, (int)(CRAWLER_WEIBO_PEROID / 1000 /60));
+		Timer timer2 = new Timer();
+		timer2.schedule(new UserWeiboCrawlerSchedule(uid,cookies, fixedThreadPool), new Date(), CRAWLER_WEIBO_PEROID);
+		
+	}
+	public static void main(String[] args) {
+		schedule("3202926715");
+		schedule("2100689171");
+//		String username = "liangchen1988915@gmail.com";
+//		String password = "12345678";
+////		String username = "dexctor@gmail.com";
+////		String password = "dogeyes007";
+//		String id1 = "3202926715";
+//		String id2 = "2100689171";
+// 		Map<String, String> cookies = null;
+//		try {
+//			cookies = Loginer.getCookies(username, password);
+//		} catch (IOException e1) {
+//			e1.printStackTrace();
+//		}
+		
+//		Timer timer1 = new Timer();
+//		timer1.schedule(new UserCrawlerSchedule(id2, cookies, fixedThreadPool), new Date(), CRAWLER_USER_PEROID*60l*60l*1000l);
+//		timer1.schedule(new UserCrawlerSchedule(id1, cookies, fixedThreadPool), new Date(), CRAWLER_USER_PEROID*60l*60l*1000l);
+
+
+//		Timer timer2 = new Timer();
+//		timer2.schedule(new UserWeiboCrawlerSchedule(id1,cookies, fixedThreadPool), new Date(), CRAWLER_WEIBO_PEROID);
+//		timer2.schedule(new UserWeiboCrawlerSchedule(id2,cookies, fixedThreadPool), new Date(), CRAWLER_WEIBO_PEROID);
+
 	}
 }

@@ -30,14 +30,15 @@ public class UserWeiboCrawler implements Runnable {
 		this.uid = uid;
 		this.cookies = cookies;
 		this.screenName = screenName;
-		init();
+//		init();
 	}
 	public UserWeiboCrawler(String uid,String screenName, Map<String, String> cookies)
 	{
 		this.uid = uid;
 		this.cookies = cookies;
 		this.screenName = screenName;
-		init();
+//		init();
+
 	}
 	
 	private void init()  //初始化，从数据库中读取上次抓取微博的时间
@@ -97,8 +98,9 @@ public class UserWeiboCrawler implements Runnable {
 	public void run() {
 		crawler();		
 	}
-	public void crawler()
+	public void crawler()  	//抓取微博
 	{
+		init();
 		Date lastestDate = lastTime;
 		String urlsuffix = '/' + uid;
 				
@@ -130,7 +132,7 @@ public class UserWeiboCrawler implements Runnable {
 		close(uid, new Date());
 	}
 	
-	public static void close(String uid, Date lastestDate)
+	public static void close(String uid, Date lastestDate) //将最新采集微博时间存回到数据库
 	{
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
